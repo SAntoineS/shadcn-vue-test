@@ -13,6 +13,14 @@ export default defineConfig({
     },
   },
   plugins: [vue()],
+  build: {
+    lib: {
+      entry: './src/main.ts',
+      name: 'web-app',
+      // the proper extensions will be added
+      fileName: 'web-app'
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

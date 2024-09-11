@@ -6,7 +6,5 @@
 
 
 export const pluginsWrapper = {
-    install(GivenVue: any) {
-        const Vue = GivenVue
-    }
+    install() { }
 }
