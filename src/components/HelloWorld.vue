@@ -281,8 +281,6 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-
-
                   </div>
                   <Separator class="my-5" label=""/>
 
@@ -503,6 +501,17 @@ function onSubmit(values: any) {
                               <Search class="mr-2 h-4 w-4"/>
                               Rechercher
                             </Button>
+
+                            <TooltipProvider>
+                              <Tooltip :delay-duration="200">
+                                <TooltipTrigger as-child>
+                                  <Info class="w-8 h-8" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Pour modifier veuillez passer par l'interface de modification</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </FormControl>
                         <FormMessage/>
