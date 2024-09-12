@@ -2,8 +2,10 @@
 import HelloWorld from './components/HelloWorld.vue'
 </script>
 
-<template>
-  <HelloWorld msg="Vite + Vue" />
+<template class="">
+  <div class="">
+    <HelloWorld msg="Vite + Vue"/>
+  </div>
 </template>
 
 <style scoped>
