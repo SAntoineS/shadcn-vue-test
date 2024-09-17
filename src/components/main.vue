@@ -34,7 +34,7 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel, SelectSeparator,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
@@ -65,28 +65,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import StepInscription from "@/components/steps/stepInscription.vue";
+import StepResponsable from "@/components/steps/stepResponsable.vue";
+import {formSchema} from "@/validators/zod-validators.ts";
 
-/*const formSchema = [
-  z.object({
-    fullName: z.string(),
-    email: z.string().email(),
-  }),
-  z.object({
-    password: z.string().min(2).max(50),
-    confirmPassword: z.string(),
-  }).refine(
-      (values) => {
-        return values.password === values.confirmPassword
-      },
-      {
-        message: 'Passwords must match!',
-        path: ['confirmPassword'],
-      },
-  ),
-  z.object({
-    favoriteDrink: z.union([z.literal('coffee'), z.literal('tea'), z.literal('soda')]),
-  }),
-]*/
+// Variables et références
+const uniteLocale = ref<any>({});
 
 const stepIndex = ref(1)
 const steps = [
@@ -109,16 +93,15 @@ function HandleSubmit(meta, values, validate) {
   validate()
 
   if (stepIndex.value === steps.length && meta.valid) {
-    onSubmit(values)
+    toast({
+      title: 'Vérifier les valeurs',
+      description: h('pre', {class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4'}, h('code', {class: 'text-white'}, JSON.stringify(values, null, 2)))
+    })
   }
 }
 
-function onSubmit(values: any) {
-  toast({
-    title: 'Vérifier les valeurs',
-    description: h('pre', {class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4'}, h('code', {class: 'text-white'}, JSON.stringify(values, null, 2)))
-  })
-}
+const exampleType = ['Type 1', 'Type 2', 'Type 3']
+
 </script>
 
 <template>
@@ -126,8 +109,8 @@ function onSubmit(values: any) {
     <Toaster/>
     <Card class="w-full">
       <CardContent class="pt-20">
-        <!--        <Form v-slot="{ meta, values, validate }" as="" keep-values :validation-schema="toTypedSchema(formSchema[stepIndex - 1])">-->
-        <Form v-slot="{ meta, values, validate }" as="" keep-values>
+        <Form v-slot="{ meta, values, validate }" as="" keep-values
+              :validation-schema="toTypedSchema(formSchema[stepIndex - 1])">
           <Stepper v-slot="{ isNextDisabled, isPrevDisabled, nextStep, prevStep }" v-model="stepIndex"
                    class="block w-full">
             <form @submit.prevent="HandleSubmit(meta, values, validate)">
@@ -171,116 +154,115 @@ function onSubmit(values: any) {
 
               <div class="flex flex-col gap-4 mt-4">
                 <template v-if="stepIndex === 1">
-                  <Separator class="my-5" label=""/>
-
                   <!-- Unite Légale -->
                   <h3 class="flex items-center gap-3 scroll-m-20 text-2xl font-semibold tracking-tight">
                     Unite Légale
                     <Scale/>
                   </h3>
                   <div class="flex gap-3 flex-col">
-                    <FormField v-slot="{ componentField }" name="fullName">
+                    <FormField v-slot="{ componentField }" name="typeInscription">
                       <FormItem class="w-1/2">
-                        <FormLabel>Type d'inscription</FormLabel>
-                        <FormControl>
-                          <Select v-bind="componentField">
+                        <FormLabel>Type d'inscription*</FormLabel>
+                        <Select v-bind="componentField">
+                          <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder=""/>
                             </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Types</SelectLabel>
-                                <SelectItem v-for="item in steps" :value="item.title">
-                                  {{ item.title }}
-                                </SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
+                          </FormControl>
+
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Types</SelectLabel>
+                              <SelectItem v-for="type in exampleType" :value="type">
+                                {{ type }}
+                              </SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage/>
+                      </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" name="ide">
+                      <FormItem class="w-1/2">
+                        <FormLabel>IDE*</FormLabel>
+                        <FormControl>
+                          <div class="flex items-center gap-2">
+                            <Input type="text" v-bind="componentField"/>
+
+                            <Dialog>
+                              <DialogTrigger as-child>
+                                <Button size="sm" variant="tonal">
+                                  <Search class="mr-2 h-4 w-4"/>
+                                  Rechercher
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent class="">
+                                <DialogHeader>
+                                  <DialogTitle>Importer une entreprise</DialogTitle>
+                                  <DialogDescription>
+                                    Cherchez et importez une entreprise par CHE ou nom
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div class="flex flex-col gap-4 py-4">
+                                  <div class="relative w-full max-w-sm items-center">
+                                    <Input id="search" type="text" placeholder="Search..." class="pl-10"/>
+                                    <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
+                                      <Search class="size-6 text-muted-foreground"/>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <Table>
+                                      <TableCaption>Liste des entreprises</TableCaption>
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead class="text-left">IDE</TableHead>
+                                          <TableHead>Nom</TableHead>
+                                          <TableHead class="text-right">Actions</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        <TableRow>
+                                          <TableCell class="font-semibold text-left">
+                                            CHE100000012
+                                          </TableCell>
+                                          <TableCell>
+                                            Spital Uster AG
+                                          </TableCell>
+                                          <TableCell class="text-right">
+                                            <Button variant="information" size="sm">
+                                              Import
+                                            </Button>
+                                          </TableCell>
+                                        </TableRow>
+                                      </TableBody>
+                                    </Table>
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <DialogClose as-child>
+                                    <Button type="button" variant="tonal">
+                                      Fermer
+                                    </Button>
+                                  </DialogClose>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                            <TooltipProvider>
+                              <Tooltip :delay-duration="200">
+                                <TooltipTrigger as-child>
+                                  <Info class="w-8 h-8"/>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Pour modifier veuillez passer par l'interface de modification</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                          </div>
                         </FormControl>
                         <FormMessage/>
                       </FormItem>
                     </FormField>
-                    <FormField v-slot="{ componentField }" name="email">
-                        <FormItem class="w-1/2">
-                          <FormLabel>IDE</FormLabel>
-                          <FormControl>
-                            <div class="flex items-center gap-2">
-                              <Input type="text" v-bind="componentField"/>
-
-                              <Dialog>
-                                <DialogTrigger as-child>
-                                  <Button size="sm" variant="tonal">
-                                    <Search class="mr-2 h-4 w-4"/>
-                                    Rechercher
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent class="">
-                                  <DialogHeader>
-                                    <DialogTitle>Importer une entreprise</DialogTitle>
-                                    <DialogDescription>
-                                      Cherchez et importez une entreprise par CHE ou nom
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div class="flex flex-col gap-4 py-4">
-                                    <div class="relative w-full max-w-sm items-center">
-                                      <Input id="search" type="text" placeholder="Search..." class="pl-10"/>
-                                      <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-                                      <Search class="size-6 text-muted-foreground"/>
-                                    </span>
-                                    </div>
-                                    <div>
-                                      <Table>
-                                        <TableCaption>Liste des entreprises</TableCaption>
-                                        <TableHeader>
-                                          <TableRow>
-                                            <TableHead class="text-left">IDE</TableHead>
-                                            <TableHead>Nom</TableHead>
-                                            <TableHead class="text-right">Actions</TableHead>
-                                          </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                          <TableRow>
-                                            <TableCell class="font-semibold text-left">
-                                              CHE100000012
-                                            </TableCell>
-                                            <TableCell>
-                                              Spital Uster AG
-                                            </TableCell>
-                                            <TableCell class="text-right">
-                                              <Button variant="information" size="sm">
-                                                Import
-                                              </Button>
-                                            </TableCell>
-                                          </TableRow>
-                                        </TableBody>
-                                      </Table>
-                                    </div>
-                                  </div>
-                                  <DialogFooter>
-                                    <DialogClose as-child>
-                                      <Button type="button" variant="tonal">
-                                        Fermer
-                                      </Button>
-                                    </DialogClose>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
-                              <TooltipProvider>
-                                <Tooltip :delay-duration="200">
-                                  <TooltipTrigger as-child>
-                                    <Info class="w-8 h-8" />
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Pour modifier veuillez passer par l'interface de modification</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-
-                            </div>
-                          </FormControl>
-                          <FormMessage/>
-                        </FormItem>
-                      </FormField>
                   </div>
                   <Separator class="my-5" label=""/>
 
@@ -291,7 +273,7 @@ function onSubmit(values: any) {
                   </h3>
                   <div class="flex gap-3 flex-col">
                     <div class="flex gap-3">
-                      <FormField v-slot="{ componentField }" name="tes2t">
+                      <FormField v-slot="{ componentField }" name="nameUniteLocal">
                         <FormItem class="w-full">
                           <FormLabel>Nom de l'entreprise</FormLabel>
                           <FormControl>
@@ -300,8 +282,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-
-                      <FormField v-slot="{ componentField }" name="fullName">
+                      <FormField v-slot="{ componentField }" name="formeJuridique">
                         <FormItem class="w-full">
                           <FormLabel>Type d'inscription</FormLabel>
                           <FormControl>
@@ -325,7 +306,7 @@ function onSubmit(values: any) {
                     </div>
 
                     <div class="flex gap-3">
-                      <FormField v-slot="{ componentField }" name="test">
+                      <FormField v-slot="{ componentField }" name="pays">
                         <FormItem class="w-full">
                           <FormLabel>Pays</FormLabel>
                           <FormControl>
@@ -334,7 +315,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="ds">
+                      <FormField v-slot="{ componentField }" name="langue">
                         <FormItem class="w-full">
                           <FormLabel>Langue</FormLabel>
                           <FormControl>
@@ -345,17 +326,17 @@ function onSubmit(values: any) {
                       </FormField>
                     </div>
 
-                    <FormField v-slot="{ componentField }" name="dss">
+                    <FormField v-slot="{ componentField }" name="descriptionActiEconomiques">
                       <FormItem class="w-full">
                         <FormLabel>Description de l'activité éconmique</FormLabel>
                         <FormControl>
-                          <Textarea placeholder=""/>
+                          <Textarea placeholder="" v-bind="componentField"/>
                         </FormControl>
                         <FormMessage/>
                       </FormItem>
                     </FormField>
                     <Separator class="my-5" label="Ou"/>
-                    <FormField v-slot="{ componentField }" name="fullName">
+                    <FormField v-slot="{ componentField }" name="noga">
                       <FormItem class="w-full">
                         <FormLabel>Noga 2008</FormLabel>
                         <FormControl>
@@ -387,7 +368,7 @@ function onSubmit(values: any) {
                   </h3>
                   <div class="flex gap-3 flex-col">
                     <div class="flex gap-3">
-                      <FormField v-slot="{ componentField }" name="test">
+                      <FormField v-slot="{ componentField }" name="npa">
                         <FormItem class="w-full">
                           <FormLabel>NPA</FormLabel>
                           <FormControl>
@@ -396,7 +377,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="ds">
+                      <FormField v-slot="{ componentField }" name="localite">
                         <FormItem class="w-full">
                           <FormLabel>Localité</FormLabel>
                           <FormControl>
@@ -405,7 +386,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="dsf">
+                      <FormField v-slot="{ componentField }" name="rue">
                         <FormItem class="w-full">
                           <FormLabel>Rue</FormLabel>
                           <FormControl>
@@ -414,7 +395,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="gdfgdf">
+                      <FormField v-slot="{ componentField }" name="adresseUniteNumero">
                         <FormItem class="w-full">
                           <FormLabel>Numéro de rue</FormLabel>
                           <FormControl>
@@ -425,7 +406,7 @@ function onSubmit(values: any) {
                       </FormField>
                     </div>
                     <div class="flex gap-3">
-                      <FormField v-slot="{ componentField }" name="dfgd">
+                      <FormField v-slot="{ componentField }" name="uniteCasePostaleNumero">
                         <FormItem class="w-full">
                           <FormLabel>Case postale: numéro</FormLabel>
                           <FormControl>
@@ -434,7 +415,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="dfghfs">
+                      <FormField v-slot="{ componentField }" name="uniteCasePostaleNpa">
                         <FormItem class="w-full">
                           <FormLabel>Case postale: NPA</FormLabel>
                           <FormControl>
@@ -443,7 +424,7 @@ function onSubmit(values: any) {
                           <FormMessage/>
                         </FormItem>
                       </FormField>
-                      <FormField v-slot="{ componentField }" name="dmnbmsf">
+                      <FormField v-slot="{ componentField }" name="uniteCasePostaleLocalite">
                         <FormItem class="w-full">
                           <FormLabel>Case postale: localité</FormLabel>
                           <FormControl>
@@ -456,13 +437,40 @@ function onSubmit(values: any) {
                   </div>
                   <Separator class="my-5"/>
 
+                  <!-- Contact -->
+                  <h3 class="flex items-center gap-3 scroll-m-20 text-2xl font-semibold tracking-tight">
+                    Contact
+                    <Contact/>
+                  </h3>
+                  <div class="flex gap-3">
+                    <FormField v-slot="{ componentField }" name="numeroTelephone">
+                      <FormItem class="w-full">
+                        <FormLabel>Numéro de téléphone</FormLabel>
+                        <FormControl>
+                          <Input class="" type="text" v-bind="componentField"/>
+                        </FormControl>
+                        <FormMessage/>
+                      </FormItem>
+                    </FormField>
+                    <FormField v-slot="{ componentField }" name="emailEntreprise">
+                      <FormItem class="w-full">
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input class="" type="text" v-bind="componentField"/>
+                        </FormControl>
+                        <FormMessage/>
+                      </FormItem>
+                    </FormField>
+                  </div>
+                  <Separator class="my-5"/>
+
                   <!-- Autre -->
                   <h3 class="flex items-center gap-3 scroll-m-20 text-2xl font-semibold tracking-tight">
                     Autre
                     <CircleHelp/>
                   </h3>
                   <div class="flex gap-3 flex-col">
-                    <FormField v-slot="{ componentField }" name="dsddasdss">
+                    <FormField v-slot="{ componentField }" name="remarque">
                       <FormItem class="w-full">
                         <FormLabel>Remarque</FormLabel>
                         <FormControl>
@@ -471,7 +479,7 @@ function onSubmit(values: any) {
                         <FormMessage/>
                       </FormItem>
                     </FormField>
-                    <FormField v-slot="{ componentField }" name="dfghfs">
+                    <FormField v-slot="{ componentField }" name="attachedFile">
                       <FormItem>
                         <FormLabel>Pièce jointe</FormLabel>
                         <FormControl>
@@ -481,8 +489,16 @@ function onSubmit(values: any) {
                       </FormItem>
                     </FormField>
                   </div>
-
                 </template>
+
+
+                <!--                <step-inscription-->
+                <!--                    v-if="stepIndex === 1"-->
+                <!--                    v-model:uniteLocale="uniteLocale" />-->
+                <!--                <step-responsable-->
+                <!--                    v-if="stepIndex === 2"-->
+                <!--                    v-model:uniteLocale="uniteLocale" />-->
+
 
                 <template v-if="stepIndex === 2">
                   <!-- Responsable -->
@@ -505,7 +521,7 @@ function onSubmit(values: any) {
                             <TooltipProvider>
                               <Tooltip :delay-duration="200">
                                 <TooltipTrigger as-child>
-                                  <Info class="w-8 h-8" />
+                                  <Info class="w-8 h-8"/>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>Pour modifier veuillez passer par l'interface de modification</p>
@@ -657,10 +673,12 @@ function onSubmit(values: any) {
                 </template>
               </div>
 
+              <!-- Step Actions -->
               <div class="flex items-center justify-between mt-4">
                 <Button :disabled="isPrevDisabled" variant="ghost" size="sm" @click="prevStep()">
                   Précédent
                 </Button>
+                <!-- Next or Submit Actions -->
                 <div class="flex items-center gap-3">
                   <Button variant="informationTonal" v-if="stepIndex !== 2" :type="meta.valid ? 'button' : 'submit'"
                           :disabled="isNextDisabled"
