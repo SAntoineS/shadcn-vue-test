@@ -14,8 +14,49 @@ import {Input} from "@/components/ui/input";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {Separator} from "@/components/ui/separator";
 import {Button} from "@/components/ui/button";
+import {ref, inject, Ref} from "vue";
 
 
+// Variables et références
+const uniteLocale = inject<Ref>("uniteLocale");
+
+const dialog = ref(false);
+
+const exampleType = ['Type 1', 'Type 2', 'Type 3']
+const exampleResp = [
+  {
+    legal_id: 'CHE100000012',
+    name: 'Spital User AG',
+  },
+  {
+    legal_id: 'CHE100039845',
+    name: 'Google Sarl',
+  }
+]
+
+function importResp(responsable) {
+  if (responsable) {
+    const {
+      nom, prenom, telephone, email, sexe, personne_id,
+      adresse_plz4, adresse_plznamk, adresse_deinr, adresse_rue_longname
+    } = responsable;
+
+    Object.assign(uniteLocale.value, {
+      responsableNom: nom,
+      responsablePrenom: prenom,
+      ResponsablenumeroTelephone: telephone,
+      responsableEmail: email,
+      responsableSexe: sexe,
+      responsablePersonneId: personne_id,
+      responsableNpa: adresse_plz4,
+      responsableLocalite: adresse_plznamk,
+      responsableNumeroDeRue: adresse_deinr,
+      responsableRue: adresse_rue_longname,
+    });
+
+    dialog.value = false;
+  }
+}
 </script>
 
 <template>
@@ -25,12 +66,12 @@ import {Button} from "@/components/ui/button";
     <User/>
   </h3>
   <div class="flex gap-3 flex-col">
-    <FormField v-slot="{ componentField }" name="email">
+    <FormField v-model="uniteLocale.responsablePersonneId" v-slot="{ componentField }" name="responsablePersonneId">
       <FormItem class="w-1/2">
         <FormLabel>ID Responsable</FormLabel>
         <FormControl>
           <div class="flex items-center gap-2">
-            <Input disabled type="text" v-bind="componentField"/>
+            <Input type="text" v-bind="componentField"/>
             <Button type="submit" size="sm" variant="tonal">
               <Search class="mr-2 h-4 w-4"/>
               Rechercher
@@ -51,7 +92,7 @@ import {Button} from "@/components/ui/button";
         <FormMessage/>
       </FormItem>
     </FormField>
-    <FormField v-slot="{ componentField }" name="fullName">
+    <FormField v-model="uniteLocale.responsableSexe" v-slot="{ componentField }" name="responsableSexe">
       <FormItem class="w-1/2">
         <FormLabel>Sexe</FormLabel>
         <FormControl>
@@ -62,8 +103,8 @@ import {Button} from "@/components/ui/button";
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Types</SelectLabel>
-                <SelectItem v-for="item in steps" :value="item.title">
-                  {{ item.title }}
+                <SelectItem v-for="item in exampleType" :value="item">
+                  {{ item }}
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -73,18 +114,18 @@ import {Button} from "@/components/ui/button";
       </FormItem>
     </FormField>
     <div class="flex gap-3">
-      <FormField v-slot="{ componentField }" name="tessds2t">
+      <FormField v-model="uniteLocale.responsablePrenom" v-slot="{ componentField }" name="responsablePrenom">
         <FormItem class="w-full">
-          <FormLabel>Prénom</FormLabel>
+          <FormLabel>Prénom*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>
           <FormMessage/>
         </FormItem>
       </FormField>
-      <FormField v-slot="{ componentField }" name="tesgfdgdf2t">
+      <FormField v-model="uniteLocale.responsableNom" v-slot="{ componentField }" name="responsableNom">
         <FormItem class="w-full">
-          <FormLabel>Nom</FormLabel>
+          <FormLabel>Nom*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>
@@ -101,18 +142,18 @@ import {Button} from "@/components/ui/button";
     <Contact/>
   </h3>
   <div class="flex gap-3">
-    <FormField v-slot="{ componentField }" name="tes2gfdgdt">
+    <FormField v-model="uniteLocale.responsableNumeroTelephone" v-slot="{ componentField }" name="responsableNumeroTelephone">
       <FormItem class="w-full">
-        <FormLabel>Numéro de téléphone</FormLabel>
+        <FormLabel>Numéro de téléphone*</FormLabel>
         <FormControl>
           <Input class="" type="text" v-bind="componentField"/>
         </FormControl>
         <FormMessage/>
       </FormItem>
     </FormField>
-    <FormField v-slot="{ componentField }" name="tes2gfgfdgfddgdt">
+    <FormField v-model="uniteLocale.responsableEmail" v-slot="{ componentField }" name="responsableEmail">
       <FormItem class="w-full">
-        <FormLabel>Email</FormLabel>
+        <FormLabel>Email*</FormLabel>
         <FormControl>
           <Input class="" type="text" v-bind="componentField"/>
         </FormControl>
@@ -128,9 +169,9 @@ import {Button} from "@/components/ui/button";
     <MapPinHouse/>
   </h3>
   <div class="flex gap-3 flex-col">
-    <FormField v-slot="{ componentField }" name="fullNamdfge">
+    <FormField v-model="uniteLocale.responsablePays" v-slot="{ componentField }" name="responsablePays">
       <FormItem class="w-full">
-        <FormLabel>Pays</FormLabel>
+        <FormLabel>Pays*</FormLabel>
         <FormControl>
           <Select v-bind="componentField">
             <SelectTrigger>
@@ -139,8 +180,8 @@ import {Button} from "@/components/ui/button";
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Types</SelectLabel>
-                <SelectItem v-for="item in steps" :value="item.title">
-                  {{ item.title }}
+                <SelectItem v-for="item in exampleType" :value="item">
+                  {{ item }}
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -150,36 +191,36 @@ import {Button} from "@/components/ui/button";
       </FormItem>
     </FormField>
     <div class="flex gap-3">
-      <FormField v-slot="{ componentField }" name="test">
+      <FormField v-model="uniteLocale.responsableNpa" v-slot="{ componentField }" name="responsableNpa">
         <FormItem class="w-full">
-          <FormLabel>NPA</FormLabel>
+          <FormLabel>NPA*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>
           <FormMessage/>
         </FormItem>
       </FormField>
-      <FormField v-slot="{ componentField }" name="ds">
+      <FormField v-model="uniteLocale.responsableLocalite" v-slot="{ componentField }" name="responsableLocalite">
         <FormItem class="w-full">
-          <FormLabel>Localité</FormLabel>
+          <FormLabel>Localité*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>
           <FormMessage/>
         </FormItem>
       </FormField>
-      <FormField v-slot="{ componentField }" name="dsf">
+      <FormField v-model="uniteLocale.responsableRue" v-slot="{ componentField }" name="responsableRue">
         <FormItem class="w-full">
-          <FormLabel>Rue</FormLabel>
+          <FormLabel>Rue*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>
           <FormMessage/>
         </FormItem>
       </FormField>
-      <FormField v-slot="{ componentField }" name="gdfgdf">
+      <FormField v-model="uniteLocale.responsableNumeroDeRue" v-slot="{ componentField }" name="responsableNumeroDeRue">
         <FormItem class="w-full">
-          <FormLabel>Numéro de rue</FormLabel>
+          <FormLabel>Numéro de rue*</FormLabel>
           <FormControl>
             <Input class="" type="text" v-bind="componentField"/>
           </FormControl>

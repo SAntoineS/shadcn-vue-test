@@ -1,6 +1,64 @@
 import * as z from "zod";
 
+const swissPhonePattern = /^\+41\d{9}$/
+const frenchPhonePattern = /^\+33\d{9}$/
+
+const s1 = z.string({required_error: 'Champs requis.'}).regex(swissPhonePattern, 'Numéro de téléphone non valide. (+41/+33)');
+const s2 = z.string({required_error: 'Champs requis.'}).regex(frenchPhonePattern, 'Numéro de téléphone non valide. (+41/+33)');
+
 export const formSchema = [
+    // Step Responsable
+    z.object({
+        // Responsable
+        responsablePersonneId: z
+            .optional(),
+        responsableSexe: z
+            .optional(),
+        responsablePrenom: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+        responsableNom: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+
+        // Contact
+        responsableNumeroTelephone: z
+            .union([s1,s2]),
+        responsableEmail: z
+            .string({
+                required_error: 'Champs requis.',
+            })
+            .email({
+                message: 'Email non valide.'
+            }),
+
+        // Adresse
+        responsablePays: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+        responsableNpa: z
+            .string({
+                required_error: 'Champs requis.',
+            })
+            .min(4, 'NPA non valide.')
+            .max(4, 'NPA non valide.'),
+        responsableLocalite: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+        responsableRue: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+        responsableNumeroDeRue: z
+            .string({
+                required_error: 'Champs requis.',
+            }),
+    }),
+
     // Step Inscription
     z.object({
         // Unite Légale
@@ -42,7 +100,9 @@ export const formSchema = [
         npa: z
             .string({
                 required_error: 'Champs requis.',
-            }),
+            })
+            .min(4, 'NPA non valide.')
+            .max(4, 'NPA non valide.'),
         localite: z
             .string({
                 required_error: 'Champs requis.',
@@ -73,9 +133,7 @@ export const formSchema = [
 
         // Contact
         numeroTelephone: z
-            .string({
-                required_error: 'Champs requis.',
-            }),
+            .union([s1,s2]),
         emailEntreprise: z
             .string({
                 required_error: 'Champs requis.',
@@ -86,22 +144,8 @@ export const formSchema = [
 
         // Autre
         remarque: z
-            .string({
-                required_error: 'Champs requis.',
-            })
             .optional(),
         attachedFile: z
-            .string({
-                required_error: 'Champs requis.',
-            })
             .optional()
-    }).refine(
-        data => !!data.descriptionActiEconomiques || !!data.noga,
-        'Vous devez remplir au moins un des deux champs.',
-    ),
-
-    // Step Responsable
-    z.object({
-
     }),
 ]
